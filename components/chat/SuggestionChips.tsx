@@ -1,16 +1,19 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { GraduationCap, Globe, Lightbulb } from "lucide-react";
+import { GraduationCap, Cpu, LineChart, MapPin, RefreshCcw } from "lucide-react";
 
 interface SuggestionChipsProps {
   onSelect: (text: string) => void;
 }
 
 const suggestions = [
-  { text: "Cari beasiswa S1", icon: GraduationCap },
-  { text: "Beasiswa luar negeri", icon: Globe },
-  { text: "Saya minat teknologi", icon: Lightbulb },
+  { text: "Cari beasiswa S1 di Indonesia", icon: GraduationCap },
+  { text: "Cari beasiswa S2 di Indonesia", icon: GraduationCap },
+  { text: "Saya minat bidang teknologi", icon: Cpu },
+  { text: "Saya minat bidang ekonomi", icon: LineChart },
+  { text: "Saya domisili Jakarta", icon: MapPin },
+  { text: "reset profile", icon: RefreshCcw },
 ];
 
 export function SuggestionChips({ onSelect }: SuggestionChipsProps) {

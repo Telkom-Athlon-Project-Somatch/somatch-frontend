@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ChatBubble } from "@/components/chat/ChatBubble";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { SuggestionChips } from "@/components/chat/SuggestionChips";
+import { DynamicActionButtons } from "@/components/chat/DynamicActionButtons";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -21,7 +22,7 @@ type Message = {
 const API_URL = "http://localhost:8000/api/chat";
 const STORAGE_KEY_MESSAGES = "somatch_messages";
 const STORAGE_KEY_SESSION = "somatch_session_id";
-const MAX_HISTORY = 10;
+const MAX_HISTORY = 8;
 const REQUEST_TIMEOUT_MS = 30_000;
 
 const INITIAL_GREETING: Message = {
@@ -70,6 +71,7 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<Message | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const sessionId = useRef("");
 
@@ -113,6 +115,9 @@ export default function ChatPage() {
       const messageText = (text ?? input).trim();
       if (!messageText || loading) return;
 
+      // Clear previous error
+      setErrorMsg(null);
+
       // 1. Add user message to state
       const userMessage: Message = { role: "user", content: messageText };
       const updatedMessages = [...messages, userMessage];
@@ -126,16 +131,23 @@ export default function ChatPage() {
         content: m.content,
       }));
 
-      // 3. Build request payload
+      // 3. History Summarization
+      const userProfileSummary = "User belum memberikan informasi lengkap";
+      const historyWithSummary = [
+        { role: "user", content: `[System Summary]: ${userProfileSummary}` }, // Note: Using role: 'user' as backend Pydantic might restrict role to user/assistant
+        ...trimmedHistory
+      ];
+
+      // 4. Build request payload
       const payload = {
         session_id: sessionId.current,
         message: messageText,
-        history: trimmedHistory,
+        history: historyWithSummary,
       };
 
       console.log("📤 [Somatch] Request:", JSON.stringify(payload, null, 2));
 
-      // 4. Fetch with AbortController timeout
+      // 5. Fetch with AbortController timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(
         () => controller.abort("Request timeout after " + REQUEST_TIMEOUT_MS + "ms"),
@@ -178,14 +190,15 @@ export default function ChatPage() {
           (error instanceof DOMException && error.name === "AbortError") ||
           controller.signal.aborted;
 
-        const errorMessage: Message = {
+        const errorResponse: Message = {
           role: "assistant",
           content: isAbort
             ? "Koneksi ke server terlalu lama ⏱️ Coba lagi ya!"
-            : "Terjadi kesalahan, coba lagi ya 🙏",
+            : "Terjadi kesalahan sistem, coba lagi ya 🙏",
           mode: "error",
         };
-        setMessages((prev) => [...prev, errorMessage]);
+        // Do NOT add to messages state to avoid history noise
+        setErrorMsg(errorResponse);
       } finally {
         clearTimeout(timeoutId);
         setLoading(false);
@@ -292,14 +305,36 @@ export default function ChatPage() {
         </AnimatePresence>
 
         {/* Messages */}
-        {messages.map((msg, i) => (
+        {messages.map((msg, i) => {
+          const isLastMessage = i === messages.length - 1;
+          const showActions = isLastMessage && msg.role === "assistant" && !loading && !errorMsg;
+
+          return (
+            <div key={`${i}-${msg.role}`} className="flex flex-col gap-2">
+              <ChatBubble
+                role={msg.role}
+                content={msg.content}
+                mode={msg.mode}
+              />
+              {showActions && msg.mode && (
+                <DynamicActionButtons
+                  mode={msg.mode}
+                  response={msg.content}
+                  onSelect={handleSuggestion}
+                />
+              )}
+            </div>
+          );
+        })}
+
+        {/* Error Message (not saved in history) */}
+        {errorMsg && (
           <ChatBubble
-            key={`${i}-${msg.role}`}
-            role={msg.role}
-            content={msg.content}
-            mode={msg.mode}
+            role={errorMsg.role}
+            content={errorMsg.content}
+            mode={errorMsg.mode}
           />
-        ))}
+        )}
 
         {/* Loading Indicator */}
         <AnimatePresence>
