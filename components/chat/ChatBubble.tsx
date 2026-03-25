@@ -1,6 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface ChatBubbleProps {
   role: "user" | "assistant";
@@ -75,20 +77,11 @@ export function ChatBubble({ role, content, mode }: ChatBubbleProps) {
       className={`flex ${isUser ? "justify-end" : "justify-start"}`}
     >
       <div className="flex flex-col gap-1 max-w-[70%]">
-        {/* Avatar + Name Label */}
-        <span
-          className={`text-xs font-medium px-1 ${
-            isUser
-              ? "text-right text-[oklch(0.7_0.05_260)]"
-              : "text-left text-[oklch(0.65_0.25_264)]"
-          }`}
-        >
-          {isUser ? "Kamu" : "Somatch AI"}
-        </span>
+        {/* Avatar + Name Label removed for cleaner look */}
 
         {/* Bubble — highlight border for recommendation mode */}
         <div
-          className={`relative px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap break-words ${
+          className={`relative px-4 py-3 text-sm leading-relaxed break-words markdown-content ${
             isUser
               ? "bg-gradient-to-br from-[oklch(0.55_0.25_264)] to-[oklch(0.45_0.25_280)] text-white rounded-2xl rounded-br-md shadow-[0_2px_16px_oklch(0.55_0.25_264/0.25)]"
               : `bg-[oklch(0.14_0.04_260)] text-[oklch(0.9_0.02_260)] rounded-2xl rounded-bl-md shadow-[0_2px_12px_oklch(0_0_0/0.2)] ${
@@ -100,23 +93,27 @@ export function ChatBubble({ role, content, mode }: ChatBubbleProps) {
                 }`
           }`}
         >
-          {content}
+          <ReactMarkdown 
+            remarkPlugins={[remarkGfm]}
+            components={{
+              p: ({ node, ...props }) => <p {...props} className="mb-2 last:mb-0" />,
+              ul: ({ node, ...props }) => <ul {...props} className="list-disc ml-4 mb-2" />,
+              ol: ({ node, ...props }) => <ol {...props} className="list-decimal ml-4 mb-2" />,
+              li: ({ node, ...props }) => <li {...props} className="mb-0.5" />,
+              strong: ({ node, ...props }) => <strong {...props} className="font-bold text-white" />,
+            }}
+          >
+            {content}
+          </ReactMarkdown>
         </div>
 
-        {/* Mode Badge + Hint (AI only) */}
-        {!isUser && badge && mode && (
+        {/* Hint (AI only) — logo/mode hidden as requested */}
+        {!isUser && mode === "profile_request" && hint && (
           <div className="flex flex-col gap-1 px-1">
-            <span
-              className={`inline-flex items-center gap-1 w-fit text-[10px] font-mono font-medium px-2 py-0.5 rounded-full border border-[oklch(0.3_0.1_264/0.2)] ${badge.bg} ${badge.text}`}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${badge.dot} animate-pulse`} />
-              {badge.label}
+            <span className="text-[11px] text-[oklch(0.75_0.15_60/0.8)] italic px-0.5 font-medium flex items-center gap-1.5">
+               <span className="w-1.5 h-1.5 rounded-full bg-[oklch(0.7_0.15_60)] animate-pulse" />
+               {hint}
             </span>
-            {hint && (
-              <span className="text-[11px] text-[oklch(0.55_0.04_260)] italic px-0.5">
-                {hint}
-              </span>
-            )}
           </div>
         )}
       </div>

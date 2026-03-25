@@ -4,6 +4,7 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CheckCircle2, Sparkles, ArrowRight, Bot, User } from "lucide-react";
+import Image from "next/image";
 import { HeroChatDemo } from "./hero-chat-demo";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -34,7 +35,7 @@ export function HeroSection() {
                     className="flex flex-col gap-8"
                 >
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-sm font-medium w-fit">
-                        <Sparkles className="h-4 w-4" />
+                        <Image src="/favicon.png" alt="Somatch Logo" width={16} height={16} className="rounded-full" />
                         <span>AI-Powered Scholarship Assistant</span>
                     </div>
 

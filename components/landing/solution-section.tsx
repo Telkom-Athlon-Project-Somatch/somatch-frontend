@@ -2,6 +2,7 @@
 
 import { CheckCircle2, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 const highlights = [
     "Analisis profil mahasiswa",
@@ -34,8 +35,8 @@ export function SolutionSection() {
                                 <div className="absolute w-48 h-48 rounded-full border border-white/10" />
                                 <div className="absolute w-32 h-32 rounded-full border border-indigo-500/30" />
                                 {/* Center node */}
-                                <div className="relative z-10 w-20 h-20 rounded-full bg-indigo-500/10 border border-indigo-400/30 flex items-center justify-center shadow-lg shadow-indigo-500/40 backdrop-blur-md">
-                                    <Sparkles className="h-10 w-10 text-indigo-400" />
+                                <div className="relative z-10 w-20 h-20 rounded-full bg-indigo-500/10 border border-indigo-400/30 flex items-center justify-center shadow-lg shadow-indigo-500/40 backdrop-blur-md overflow-hidden p-3">
+                                    <Image src="/favicon.png" alt="Somatch AI" width={56} height={56} className="object-cover rounded-full" />
                                 </div>
                                 {/* Orbiting small nodes */}
                                 <div className="absolute top-12 right-16 w-10 h-10 rounded-full bg-white/10 border border-white/10 backdrop-blur-md flex items-center justify-center shadow-lg">

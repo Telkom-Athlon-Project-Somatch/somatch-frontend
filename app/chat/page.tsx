@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Sparkles, Loader2 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { ChatBubble } from "@/components/chat/ChatBubble";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { SuggestionChips } from "@/components/chat/SuggestionChips";
@@ -19,7 +20,8 @@ type Message = {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const API_URL = "http://localhost:8000/api/chat";
+const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, "");
+const API_URL = `${BASE_URL}/api/chat`;
 const STORAGE_KEY_MESSAGES = "somatch_messages";
 const STORAGE_KEY_SESSION = "somatch_session_id";
 const MAX_HISTORY = 8;
@@ -27,7 +29,7 @@ const REQUEST_TIMEOUT_MS = 30_000;
 
 const INITIAL_GREETING: Message = {
   role: "assistant",
-  content: "Halo! Aku Somatch AI, siap bantu kamu menemukan beasiswa yang cocok 🎓",
+  content: "Halo! Aku Somatch AI, asisten pribadimu untuk mencari beasiswa di Indonesia 🎓\n\nAgar aku bisa memberikan rekomendasi yang paling akurat dan sesuai, silakan beritahu aku detail profilmu seperti:\n- **Jenjang Pendidikan** (misal: S1, D3, SMA)\n- **Minat/Jurusan** (misal: Teknik, Seni, Ekonomi)\n- **Domisili** (Provinsi/Kota)\n- **IPK Terakhir** (opsional)\n\nApa yang bisa aku bantu hari ini?",
   mode: "general",
 };
 
@@ -258,8 +260,8 @@ export default function ChatPage() {
         </Link>
 
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-[oklch(0.65_0.25_264)] to-[oklch(0.55_0.25_280)] shadow-[0_0_16px_oklch(0.65_0.25_264/0.3)]">
-            <Sparkles className="w-4 h-4 text-white" />
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg overflow-hidden">
+            <Image src="/favicon.png" alt="Somatch Logo" width={32} height={32} className="w-full h-full object-cover" />
           </div>
           <div className="min-w-0">
             <h1 className="text-sm font-bold text-white leading-tight truncate font-[family-name:var(--font-heading)]">
@@ -290,8 +292,8 @@ export default function ChatPage() {
               className="flex flex-col items-center gap-5 pt-4 pb-2"
             >
               {/* Logo */}
-              <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-[oklch(0.65_0.25_264)] to-[oklch(0.50_0.25_280)] shadow-[0_0_40px_oklch(0.65_0.25_264/0.3)]">
-                <Sparkles className="w-7 h-7 text-white" />
+              <div className="flex items-center justify-center w-14 h-14 rounded-2xl overflow-hidden">
+                <Image src="/favicon.png" alt="Somatch Logo" width={56} height={56} className="w-full h-full object-cover" />
               </div>
 
               <p className="text-sm text-[oklch(0.55_0.04_260)] text-center max-w-xs leading-relaxed">

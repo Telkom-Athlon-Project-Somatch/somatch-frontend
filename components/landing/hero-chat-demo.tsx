@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { TypeAnimation } from "react-type-animation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Sparkles, User } from "lucide-react";
+import Image from "next/image";
 
 export function HeroChatDemo() {
     const router = useRouter();
@@ -53,8 +54,8 @@ export function HeroChatDemo() {
                 {/* Chat header */}
                 <div className="flex items-center gap-4 p-4 border-b border-white/5 relative z-10 bg-slate-900/50">
                     <div className="relative">
-                        <div className="h-10 w-10 flex flex-col items-center justify-center rounded-full bg-indigo-500/20 text-indigo-400">
-                            <Sparkles className="h-5 w-5" />
+                        <div className="h-10 w-10 flex flex-col items-center justify-center rounded-full bg-indigo-500/20 text-indigo-400 overflow-hidden">
+                            <Image src="/favicon.png" alt="Somatch Logo" width={40} height={40} className="w-full h-full object-cover rounded-full" />
                         </div>
                         <div className="absolute bottom-0 right-0 w-3 h-3 bg-teal-400 rounded-full border-2 border-slate-900 shadow-[0_0_10px_rgba(45,212,191,0.5)]" />
                     </div>
@@ -74,8 +75,8 @@ export function HeroChatDemo() {
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 className="flex gap-3"
                             >
-                                <div className="h-8 w-8 flex flex-col items-center justify-center rounded-full bg-indigo-500/20 text-indigo-400 shrink-0 mt-1">
-                                    <Sparkles className="h-4 w-4" />
+                                <div className="h-8 w-8 flex flex-col items-center justify-center rounded-full bg-indigo-500/20 text-indigo-400 shrink-0 mt-1 overflow-hidden p-0.5">
+                                    <Image src="/favicon.png" alt="Somatch Logo" width={32} height={32} className="w-full h-full object-cover rounded-full" />
                                 </div>
                                 <div className="flex flex-col gap-1 max-w-[85%]">
                                     <div className="bg-white/5 text-slate-200 p-3 rounded-2xl rounded-tl-sm border border-white/5 shadow-sm text-[13px] leading-relaxed">
@@ -127,8 +128,8 @@ export function HeroChatDemo() {
                                 exit={{ opacity: 0, display: "none" }}
                                 className="flex gap-3 mt-2 items-center"
                             >
-                                <div className="h-8 w-8 flex flex-col items-center justify-center rounded-full bg-indigo-500/20 text-indigo-400 shrink-0">
-                                    <Sparkles className="h-4 w-4" />
+                                <div className="h-8 w-8 flex flex-col items-center justify-center rounded-full bg-indigo-500/20 text-indigo-400 shrink-0 overflow-hidden p-0.5">
+                                    <Image src="/favicon.png" alt="Somatch Logo" width={32} height={32} className="w-full h-full object-cover rounded-full" />
                                 </div>
                                 <div className="bg-white/5 p-3 rounded-2xl rounded-tl-sm border border-white/5 shadow-sm flex gap-1 items-center h-10 px-4">
                                     <motion.div animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0 }} className="w-1.5 h-1.5 bg-slate-400 rounded-full" />
@@ -146,8 +147,8 @@ export function HeroChatDemo() {
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 className="flex gap-3 mt-2"
                             >
-                                <div className="h-8 w-8 flex flex-col items-center justify-center rounded-full bg-indigo-500/20 text-indigo-400 shrink-0 mt-1">
-                                    <Sparkles className="h-4 w-4" />
+                                <div className="h-8 w-8 flex flex-col items-center justify-center rounded-full bg-indigo-500/20 text-indigo-400 shrink-0 mt-1 overflow-hidden p-0.5">
+                                    <Image src="/favicon.png" alt="Somatch Logo" width={32} height={32} className="w-full h-full object-cover rounded-full" />
                                 </div>
                                 <div className="flex flex-col gap-2 w-full text-[13px]">
                                     <div className="bg-white/5 text-slate-200 p-3 rounded-2xl rounded-tl-sm border border-white/5 shadow-sm leading-relaxed w-fit">

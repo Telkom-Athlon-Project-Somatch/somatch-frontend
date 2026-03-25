@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Sparkles } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
@@ -121,8 +122,8 @@ export function Navbar() {
                     className="group relative flex items-center justify-center gap-2 shrink-0 md:flex-none"
                     aria-label="Go to home"
                 >
-                    <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-linear-to-br from-[oklch(0.65_0.25_264)] to-[oklch(0.55_0.25_280)] shadow-[0_0_20px_oklch(0.65_0.25_264/0.3)] group-hover:shadow-[0_0_28px_oklch(0.65_0.25_264/0.5)] transition-shadow duration-300">
-                        <Sparkles className="w-4 h-4 text-white" />
+                    <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-linear-to-br from-[oklch(0.65_0.25_264)] to-[oklch(0.55_0.25_280)] shadow-[0_0_20px_oklch(0.65_0.25_264/0.3)] group-hover:shadow-[0_0_28px_oklch(0.65_0.25_264/0.5)] transition-shadow duration-300 overflow-hidden">
+                        <Image src="/favicon.png" alt="Somatch Logo" width={32} height={32} className="w-full h-full object-cover" />
                     </div>
                     <span className="font-semibold bg-linear-to-r from-[oklch(0.65_0.25_264)] to-[oklch(0.75_0.20_280)] bg-clip-text text-transparent">
                         Somatch
@@ -156,7 +157,7 @@ export function Navbar() {
                         <div className="absolute inset-0 rounded-full overflow-hidden">
                             <div className="absolute inset-0 translate-x-[-150%] group-hover:animate-shimmer bg-linear-to-r from-transparent via-white/10 to-transparent" />
                         </div>
-                        <Sparkles className="relative w-3.5 h-3.5" />
+                        <Image src="/favicon.png" alt="" width={14} height={14} className="relative" />
                         <span className="relative">Start AI Chat</span>
                     </Link>
                 </div>
@@ -178,8 +179,8 @@ export function Navbar() {
                                 {/* Mobile Header */}
                                 <div className="flex items-center justify-between p-6 border-b border-[oklch(0.2_0.06_260/0.5)]">
                                     <div className="flex items-center gap-2">
-                                        <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-linear-to-br from-[oklch(0.65_0.25_264)] to-[oklch(0.55_0.25_280)]">
-                                            <Sparkles className="w-3.5 h-3.5 text-white" />
+                                        <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-linear-to-br from-[oklch(0.65_0.25_264)] to-[oklch(0.55_0.25_280)] overflow-hidden">
+                                            <Image src="/favicon.png" alt="Somatch Logo" width={28} height={28} className="w-full h-full object-cover" />
                                         </div>
                                         <span style={{ fontFamily: "var(--font-heading), var(--font-sans)" }} className="font-bold tracking-tight text-[oklch(0.95_0.02_260)]">
                                             So
@@ -247,7 +248,7 @@ export function Navbar() {
                                         onClick={() => setOpen(false)}
                                         className="flex items-center justify-center gap-2 h-11 w-full rounded-xl bg-linear-to-r from-[oklch(0.55_0.25_264)] via-[oklch(0.60_0.25_272)] to-[oklch(0.65_0.20_280)] text-white text-sm font-semibold shadow-[0_0_20px_oklch(0.65_0.25_264/0.25)] hover:shadow-[0_0_30px_oklch(0.65_0.25_264/0.4)] transition-shadow duration-300"
                                     >
-                                        <Sparkles className="w-4 h-4" />
+                                        <Image src="/favicon.png" alt="" width={16} height={16} />
                                         Start AI Chat
                                     </Link>
                                 </div>
