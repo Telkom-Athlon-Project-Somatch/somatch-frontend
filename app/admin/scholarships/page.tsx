@@ -10,7 +10,7 @@ import { Loader2 } from "lucide-react";
 import ScholarshipTable from "@/components/admin/ScholarshipTable";
 import DetailModal from "@/components/admin/DetailModal";
 import { Scholarship } from "@/types/scholarship";
-import { updateScholarshipStatus, updateScholarship } from "@/lib/admin-api";
+import { updateScholarshipStatus, updateScholarship, deleteScholarship } from "@/lib/admin-api";
 
 export default function ScholarshipsPage() {
   const [keyword, setKeyword] = useState("");
@@ -23,6 +23,11 @@ export default function ScholarshipsPage() {
   const [modalScholarship, setModalScholarship] = useState<Scholarship | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [savingModal, setSavingModal] = useState(false);
+
+  // Delete modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [scholarshipToDelete, setScholarshipToDelete] = useState<{id: string, title: string} | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleCrawl = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,6 +93,34 @@ export default function ScholarshipsPage() {
   const handleApprove = (id: string) => updateStatus(id, "verified", "approved");
   const handleReject = (id: string) => updateStatus(id, "suspicious", "rejected");
   const handlePending = (id: string) => updateStatus(id, "pending", "marked as pending");
+
+  const openDeleteModal = (id: string, title: string) => {
+    setScholarshipToDelete({ id, title });
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!scholarshipToDelete) return;
+    setIsDeleting(true);
+    
+    try {
+      await deleteScholarship(scholarshipToDelete.id);
+      toast("Scholarship deleted successfully.", "success");
+      
+      if (result) {
+        setResult((prev: any) => ({
+          ...prev,
+          items: prev.items.filter((s: Scholarship) => s.id !== scholarshipToDelete.id),
+        }));
+      }
+    } catch {
+      toast("Failed to delete scholarship.", "error");
+    } finally {
+      setIsDeleting(false);
+      setDeleteModalOpen(false);
+      setScholarshipToDelete(null);
+    }
+  };
 
   const handleSave = async (id: string, updates: Partial<Scholarship>) => {
     setSavingModal(true);
@@ -229,6 +262,7 @@ export default function ScholarshipsPage() {
                     onApprove={handleApprove}
                     onReject={handleReject}
                     onMarkPending={handlePending}
+                    onDelete={openDeleteModal}
                   />
                 </div>
               )}
@@ -251,6 +285,43 @@ export default function ScholarshipsPage() {
         onSave={handleSave}
         saving={savingModal}
       />
+      
+      {/* Delete Confirmation Modal */}
+      {deleteModalOpen && scholarshipToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+            onClick={() => !isDeleting && setDeleteModalOpen(false)}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            className="relative w-full max-w-md bg-card border border-border shadow-2xl rounded-2xl overflow-hidden"
+          >
+            <div className="p-6">
+              <div className="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center mb-4">
+                <span className="text-2xl">⚠️</span>
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-2">Delete Scholarship</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Are you sure you want to delete <span className="font-semibold text-foreground">&quot;{scholarshipToDelete.title}&quot;</span>? This action is permanent and cannot be undone.
+              </p>
+              <div className="flex justify-end gap-3 mt-8">
+                <Button variant="outline" onClick={() => setDeleteModalOpen(false)} disabled={isDeleting}>
+                  Cancel
+                </Button>
+                <Button variant="danger" onClick={confirmDelete} disabled={isDeleting}>
+                  {isDeleting ? "Deleting..." : "Delete"}
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
       
       <ToastContainer toasts={toasts} onDismiss={dismiss} />
     </div>
