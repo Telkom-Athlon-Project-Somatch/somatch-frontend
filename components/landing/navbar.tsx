@@ -177,7 +177,7 @@ export function Navbar() {
                                 {/* Mobile Header */}
                                 <div className="flex items-center justify-between p-6 border-b border-[oklch(0.2_0.06_260/0.5)]">
                                     <div className="flex items-center gap-2">
-                                        <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-linear-to-br from-[oklch(0.65_0.25_264)] to-[oklch(0.55_0.25_280)] overflow-hidden">
+                                        <div className="flex items-center justify-center w-7 h-7 rounded-lg overflow-hidden">
                                             <Image src="/favicon.png" alt="Somatch Logo" width={28} height={28} className="w-full h-full object-cover" />
                                         </div>
                                         <span style={{ fontFamily: "var(--font-heading), var(--font-sans)" }} className="font-bold tracking-tight text-[oklch(0.95_0.02_260)]">
