@@ -122,9 +122,7 @@ export function Navbar() {
                     className="group relative flex items-center justify-center gap-2 shrink-0 md:flex-none"
                     aria-label="Go to home"
                 >
-                    <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-linear-to-br from-[oklch(0.65_0.25_264)] to-[oklch(0.55_0.25_280)] shadow-[0_0_20px_oklch(0.65_0.25_264/0.3)] group-hover:shadow-[0_0_28px_oklch(0.65_0.25_264/0.5)] transition-shadow duration-300 overflow-hidden">
-                        <Image src="/favicon.png" alt="Somatch Logo" width={32} height={32} className="w-full h-full object-cover" />
-                    </div>
+                    <Image src="/favicon.png" alt="Somatch Logo" width={32} height={32} className="w-full h-full object-cover" />
                     <span className="font-semibold bg-linear-to-r from-[oklch(0.65_0.25_264)] to-[oklch(0.75_0.20_280)] bg-clip-text text-transparent">
                         Somatch
                     </span>
