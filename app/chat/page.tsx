@@ -20,8 +20,7 @@ type Message = {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, "");
-const API_URL = `${BASE_URL}/api/chat`;
+const API_URL = "/api/chat";
 const STORAGE_KEY_MESSAGES = "somatch_messages";
 const STORAGE_KEY_SESSION = "somatch_session_id";
 const MAX_HISTORY = 8;
