@@ -8,38 +8,35 @@ import { fetchStats } from "@/lib/admin-api";
 import { AdminStats } from "@/types/scholarship";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
+
+import { Users, UserCheck, UserPlus, GraduationCap, BadgeCheck, FileWarning, Search, Database, Fingerprint, Activity } from "lucide-react";
 
 const STAT_CARDS = [
-  { key: "total", label: "Total Scholarships", icon: "🎓", color: "text-primary", sublabel: "All entries" },
-  { key: "verified", label: "Verified", icon: "✅", color: "text-emerald-500", sublabel: "Ready to show" },
-  { key: "pending", label: "Pending Review", icon: "⏳", color: "text-amber-500", sublabel: "Awaiting admin" },
-  { key: "suspicious", label: "Suspicious", icon: "⚠️", color: "text-rose-500", sublabel: "Flagged by AI" },
-  { key: "unverified", label: "Unverified", icon: "🔍", color: "text-slate-500", sublabel: "Newly crawled" },
-  {
-    key: "avg_trust_score",
-    label: "Avg Trust Score",
-    icon: "🧠",
-    color: "text-violet-500",
-    sublabel: "AI confidence",
-  },
+  { key: "totalUsers", label: "Total Users", icon: <Users size={24} />, color: "text-blue-500", sublabel: "All registered" },
+  { key: "newUsers", label: "New Users", icon: <UserPlus size={24} />, color: "text-emerald-500", sublabel: "Last 7 days" },
+  { key: "total", label: "Total Scholarships", icon: <GraduationCap size={24} />, color: "text-primary", sublabel: "All entries" },
+  { key: "verified", label: "Verified", icon: <BadgeCheck size={24} />, color: "text-emerald-500", sublabel: "Ready to show" },
+  { key: "unverified", label: "Unverified", icon: <FileWarning size={24} />, color: "text-amber-500", sublabel: "Pending admin" }
 ] as const;
 
 export default function AdminDashboardPage() {
+  const { token } = useAuth();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchStats()
+    fetchStats(token)
       .then(setStats)
       .catch(() => {
         // Fallback mock data if backend is down
         setStats({
+          totalUsers: 1420,
+          activeUsers: 89,
+          newUsers: 124,
           total: 12,
           verified: 4,
-          pending: 3,
-          suspicious: 1,
           unverified: 4,
-          avg_trust_score: 74.6,
         });
       })
       .finally(() => setLoading(false));
@@ -76,16 +73,16 @@ export default function AdminDashboardPage() {
             </div>
             <div className="flex flex-wrap gap-3 mt-8">
               <Link
-                href="/admin/verification"
+                href="/admin/crawl"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary hover:opacity-90 text-primary-foreground text-sm font-bold shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5"
               >
-                🔍 Go to Verification Queue
+                <Search size={18} /> Crawl New Data
               </Link>
               <Link
-                href="/admin/scholarships"
+                href="/admin/verification"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-card border border-border text-foreground hover:bg-muted text-sm font-bold transition-all shadow-sm hover:-translate-y-0.5"
               >
-                📋 View All Scholarships
+                <Database size={18} /> Manage Scholarships
               </Link>
             </div>
           </div>
@@ -97,9 +94,9 @@ export default function AdminDashboardPage() {
             <span className="w-8 h-px bg-border" />
             System Overview
           </h2>
-          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
             {loading
-              ? Array.from({ length: 6 }).map((_, i) => (
+              ? Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className="rounded-2xl border border-border bg-card p-5">
                     <Skeleton className="h-3 w-20 mb-3" />
                     <Skeleton className="h-8 w-12" />
@@ -114,11 +111,7 @@ export default function AdminDashboardPage() {
                   >
                     <StatCard
                       label={card.label}
-                      value={
-                        card.key === "avg_trust_score"
-                          ? `${stats?.[card.key] ?? 0}`
-                          : stats?.[card.key] ?? 0
-                      }
+                      value={stats?.[card.key] ?? 0}
                       icon={card.icon}
                       color={card.color}
                       sublabel={card.sublabel}
@@ -134,28 +127,35 @@ export default function AdminDashboardPage() {
             <span className="w-8 h-px bg-border" />
             Quick Access
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
-                href: "/admin/verification",
-                icon: "✨",
-                title: "Verification Queue",
-                desc: "Review AI-crawled scholarships pending your final seal of approval.",
+                href: "/admin/crawl",
+                icon: <Search className="text-primary" size={32} />,
+                title: "Crawl Scholarship",
+                desc: "Search and crawl scholarship data using AI.",
                 color: "border-primary/20 hover:border-primary/50",
               },
               {
-                href: "/admin/scholarships",
-                icon: "📚",
-                title: "Master Database",
-                desc: "Full administrative control over all scholarships in the system.",
+                href: "/admin/verification",
+                icon: <Database className="text-violet-500" size={32} />,
+                title: "Manage Scholarships",
+                desc: "Review and approve scholarship entries.",
                 color: "border-violet-500/20 hover:border-violet-500/50",
               },
               {
-                href: "/admin/reports",
-                icon: "📈",
-                title: "System Insights",
-                desc: "Monitor system health, AI accuracy, and trend distribution.",
+                href: "/admin/users",
+                icon: <Fingerprint className="text-emerald-500" size={32} />,
+                title: "Manage Users",
+                desc: "Control access and view user metrics.",
                 color: "border-emerald-500/20 hover:border-emerald-500/50",
+              },
+              {
+                href: "/admin/verification#logs",
+                icon: <Activity className="text-blue-500" size={32} />,
+                title: "View Activity Logs",
+                desc: "Track system and admin actions.",
+                color: "border-blue-500/20 hover:border-blue-500/50",
               },
             ].map((card) => (
               <Link
@@ -167,7 +167,7 @@ export default function AdminDashboardPage() {
                   card.color
                 )}
               >
-                <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">{card.icon}</div>
+                <div className="mb-4 group-hover:scale-110 transition-transform">{card.icon}</div>
                 <h3 className="text-lg font-black text-foreground mb-2 font-heading tracking-tight">{card.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed font-medium">{card.desc}</p>
                 <div className="mt-4 flex items-center text-xs font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">

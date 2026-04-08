@@ -3,9 +3,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Sparkles } from "lucide-react";
+import { Menu, Sparkles, LogOut, User } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
 
 const leftLinks = [
     { label: "Home", href: "#home" },
@@ -21,6 +22,7 @@ const rightLinks = [
 const allLinks = [...leftLinks, ...rightLinks];
 
 export function Navbar() {
+    const { user, logout } = useAuth();
     const [open, setOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [activeSection, setActiveSection] = useState("home");
@@ -97,9 +99,6 @@ export function Navbar() {
                 aria-label="Main Navigation"
                 className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between"
             >
-                {/* Mobile Empty Left for Centering */}
-                <div className="flex-1 md:hidden" />
-
                 {/* Left Nav Links */}
                 <div className="hidden md:flex items-center gap-1 flex-1 justify-end pr-8">
                     <ul className="flex items-center gap-1">
@@ -119,45 +118,73 @@ export function Navbar() {
                 {/* Center Logo */}
                 <Link
                     href="/#home"
-                    className="group relative flex items-center justify-center gap-2 shrink-0 md:flex-none"
+                    className="group relative flex items-center justify-center gap-2 shrink-0"
                     aria-label="Go to home"
                 >
-                    <Image src="/favicon.png" alt="Somatch Logo" width={32} height={32} className="w-full h-full object-cover" />
-                    <span className="font-semibold bg-linear-to-r from-[oklch(0.65_0.25_264)] to-[oklch(0.75_0.20_280)] bg-clip-text text-transparent">
-                        Somatch
+                    <div className="w-8 h-8 rounded-lg overflow-hidden border border-white/10 group-hover:border-white/20 transition-colors">
+                        <Image src="/favicon.png" alt="Somatch Logo" width={32} height={32} className="w-full h-full object-cover" />
+                    </div>
+                    <span className="font-bold tracking-tight text-[oklch(0.95_0.02_260)] group-hover:text-white transition-colors">
+                        So
+                        <span className="bg-linear-to-r from-[oklch(0.65_0.25_264)] to-[oklch(0.75_0.20_280)] bg-clip-text text-transparent">
+                            match
+                        </span>
                     </span>
                 </Link>
 
-                {/* Right Nav Links & CTA */}
+                {/* Right Nav Links & Auth Area */}
                 <div className="hidden md:flex flex-1 items-center justify-between pl-8">
-                    <ul className="flex items-center gap-1">
-                        {rightLinks.map((link) => (
-                            <NavLink
-                                key={link.href}
-                                link={link}
-                                isActive={
-                                    activeSection === link.href.replace("#", "")
-                                }
-                                onClick={handleLinkClick}
-                            />
-                        ))}
-                    </ul>
-                    {/* Desktop CTA */}
-                    <Link
-                        href="/chat"
-                        className="group relative inline-flex items-center gap-2 h-9 px-5 rounded-full text-sm font-semibold text-white overflow-hidden transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] shrink-0 ml-4"
-                    >
-                        {/* CTA background gradient */}
-                        <div className="absolute inset-0 bg-linear-to-r from-[oklch(0.55_0.25_264)] via-[oklch(0.60_0.25_272)] to-[oklch(0.65_0.20_280)] rounded-full" />
-                        {/* CTA glow on hover */}
-                        <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-[0_0_20px_oklch(0.65_0.25_264/0.5),inset_0_1px_0_oklch(1_0_0/0.15)]" />
-                        {/* CTA shimmer */}
-                        <div className="absolute inset-0 rounded-full overflow-hidden">
-                            <div className="absolute inset-0 translate-x-[-150%] group-hover:animate-shimmer bg-linear-to-r from-transparent via-white/10 to-transparent" />
-                        </div>
-                        <Image src="/favicon.png" alt="" width={14} height={14} className="relative" />
-                        <span className="relative">Start AI Chat</span>
-                    </Link>
+                    <div className="flex items-center gap-3">
+                        {!user ? (
+                            <>
+                                <Link
+                                    href="/login"
+                                    className="text-sm font-medium text-[oklch(0.6_0.04_260)] hover:text-white transition-colors"
+                                >
+                                    Masuk
+                                </Link>
+                                <Link
+                                    href="/register"
+                                    className="relative inline-flex h-9 px-5 items-center justify-center rounded-full text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-all duration-300 active:scale-95 shadow-[0_0_20px_rgba(79,70,229,0.3)]"
+                                >
+                                    Daftar Gratis
+                                </Link>
+                            </>
+                        ) : (
+                            <>
+                                <div className="flex items-center border-r border-white/10 pr-3 py-1">
+                                    <User className="w-3.5 h-3.5 text-slate-400 mr-2" />
+                                    <span className="text-sm text-white font-medium truncate max-w-[80px] xl:max-w-[120px]">
+                                        {user.name || user.email.split('@')[0]}
+                                    </span>
+                                </div>
+                                <Link
+                                    href="/app/explore"
+                                    className="text-sm font-medium text-slate-400 hover:text-white transition-all px-2"
+                                >
+                                    Dashboard
+                                </Link>
+                                <button
+                                    onClick={() => logout()}
+                                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 transition-all"
+                                    title="Keluar"
+                                >
+                                    <LogOut className="w-4 h-4" />
+                                </button>
+                            </>
+                        )}
+                    </div>
+
+                    <div className="flex items-center pl-4">
+                        <Link
+                            href={user ? "/app/chat" : "/login"}
+                            className="group relative inline-flex items-center gap-2 h-9 px-5 rounded-full text-sm font-bold text-white overflow-hidden transition-all duration-300 hover:scale-[1.05] active:scale-[0.95] shadow-lg shadow-indigo-500/20"
+                        >
+                            <div className="absolute inset-0 bg-linear-to-r from-indigo-600 to-purple-600 group-hover:from-indigo-500 group-hover:to-purple-500 transition-all" />
+                            <Sparkles className="w-4 h-4 relative animate-pulse" />
+                            <span className="relative uppercase tracking-widest text-xs">Mulai Chat</span>
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Mobile Hamburger */}
@@ -239,15 +266,58 @@ export function Navbar() {
                                     })}
                                 </nav>
 
-                                {/* Mobile CTA */}
-                                <div className="p-4 border-t border-[oklch(0.2_0.06_260/0.5)]">
+                                {/* Mobile CTA & Auth */}
+                                <div className="p-4 border-t border-[oklch(0.2_0.06_260/0.5)] flex flex-col gap-3">
+                                    {!user ? (
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <Link
+                                                href="/login"
+                                                onClick={() => setOpen(false)}
+                                                className="flex items-center justify-center h-11 rounded-xl bg-[oklch(0.15_0.04_260)] text-white text-sm font-semibold border border-[oklch(0.25_0.08_264/0.2)]"
+                                            >
+                                                Masuk
+                                            </Link>
+                                            <Link
+                                                href="/register"
+                                                onClick={() => setOpen(false)}
+                                                className="flex items-center justify-center h-11 rounded-xl bg-white/10 text-white text-sm font-semibold border border-white/10"
+                                            >
+                                                Daftar
+                                            </Link>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col gap-3">
+                                            <div className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Signed In As</span>
+                                                    <span className="text-sm text-white font-black font-heading truncate max-w-[160px]">
+                                                        {user.name || user.email.split('@')[0]}
+                                                    </span>
+                                                </div>
+                                                <button
+                                                    onClick={() => { logout(); setOpen(false); }}
+                                                    className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20"
+                                                >
+                                                    <LogOut className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                            <Link
+                                                href="/app/explore"
+                                                onClick={() => setOpen(false)}
+                                                className="flex items-center justify-center h-11 rounded-xl bg-white/5 text-white text-sm font-bold border border-white/10"
+                                            >
+                                                Buka Dashboard
+                                            </Link>
+                                        </div>
+                                    )}
+
                                     <Link
-                                        href="/chat"
+                                        href="/app/chat"
                                         onClick={() => setOpen(false)}
                                         className="flex items-center justify-center gap-2 h-11 w-full rounded-xl bg-linear-to-r from-[oklch(0.55_0.25_264)] via-[oklch(0.60_0.25_272)] to-[oklch(0.65_0.20_280)] text-white text-sm font-semibold shadow-[0_0_20px_oklch(0.65_0.25_264/0.25)] hover:shadow-[0_0_30px_oklch(0.65_0.25_264/0.4)] transition-shadow duration-300"
                                     >
-                                        <Image src="/favicon.png" alt="" width={16} height={16} />
-                                        Start AI Chat
+                                        <Sparkles className="w-4 h-4" />
+                                        Mulai Chat AI
                                     </Link>
                                 </div>
                             </div>

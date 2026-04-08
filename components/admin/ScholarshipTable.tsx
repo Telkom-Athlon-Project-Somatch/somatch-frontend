@@ -118,11 +118,27 @@ export default function ScholarshipTable({
                   </td>
 
                   {/* Title */}
-                  <td className="p-4 max-w-[220px]">
+                  <td className="p-4 max-w-[300px]">
                     <p className="font-semibold text-foreground truncate leading-snug">
                       {s.title}
                     </p>
                     <p className="text-xs text-muted-foreground mt-0.5 md:hidden">{s.provider}</p>
+                    {s.data_status && (
+                      <p className="text-[11px] mt-1 text-muted-foreground">
+                        Data: <span className="font-semibold uppercase">{s.data_status}</span>
+                      </p>
+                    )}
+                    {s.is_university_specific ? (
+                      <p className="text-[11px] mt-0.5 text-amber-600 dark:text-amber-400 truncate">
+                        Univ: {(s.eligible_universities && s.eligible_universities.length > 0)
+                          ? s.eligible_universities.join(", ")
+                          : "(belum terdeteksi)"}
+                      </p>
+                    ) : (
+                      <p className="text-[11px] mt-0.5 text-emerald-600 dark:text-emerald-400">
+                        General / Public
+                      </p>
+                    )}
                   </td>
 
                   {/* Provider */}

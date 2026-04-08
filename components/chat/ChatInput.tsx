@@ -31,7 +31,7 @@ export function ChatInput({ value, onChange, onSend, loading }: ChatInputProps) 
   };
 
   return (
-    <div className="relative flex items-end gap-2 p-3 bg-[oklch(0.12_0.035_260)] border border-[oklch(0.22_0.05_260)] rounded-2xl shadow-[0_-4px_24px_oklch(0_0_0/0.15)] focus-within:border-[oklch(0.45_0.2_264)] focus-within:shadow-[0_0_0_2px_oklch(0.45_0.2_264/0.15)] transition-all duration-200">
+    <div className="relative flex items-end gap-2 p-3 bg-white border border-slate-200 rounded-2xl shadow-sm focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all duration-200">
       <textarea
         ref={textareaRef}
         value={value}
@@ -40,7 +40,7 @@ export function ChatInput({ value, onChange, onSend, loading }: ChatInputProps) 
         disabled={loading}
         rows={1}
         placeholder="Tulis minat, jenjang, atau tanya beasiswa..."
-        className="flex-1 bg-transparent text-sm text-[oklch(0.9_0.02_260)] placeholder:text-[oklch(0.5_0.04_260)] resize-none outline-none py-1.5 px-1 max-h-[150px] disabled:opacity-50 scrollbar-thin"
+        className="flex-1 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 resize-none outline-none py-1.5 px-1 max-h-[150px] disabled:opacity-50 scrollbar-thin"
         id="chat-input"
       />
       <button

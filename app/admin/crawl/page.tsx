@@ -10,9 +10,27 @@ import { Loader2 } from "lucide-react";
 import ScholarshipTable from "@/components/admin/ScholarshipTable";
 import DetailModal from "@/components/admin/DetailModal";
 import { Scholarship } from "@/types/scholarship";
-import { updateScholarshipStatus, updateScholarship, deleteScholarship } from "@/lib/admin-api";
+import {
+  updateScholarshipStatus,
+  updateScholarship,
+  deleteScholarship,
+  approveStagingEntry,
+  rejectStagingEntry,
+  deleteStagingEntry,
+  updateStagingEntry,
+  isStagingId,
+} from "@/lib/admin-api";
+import { useAuth } from "@/context/AuthContext";
+
+const MOCK_CRAWL_HISTORY = [
+  { id: 1, keyword: "beasiswa S1 luar negeri 2026 fully funded", total: 12, status: "completed", timestamp: "2025-04-08T10:30:00" },
+  { id: 2, keyword: "LPDP magister 2025", total: 45, status: "completed", timestamp: "2025-04-08T09:15:00" },
+  { id: 3, keyword: "beasiswa kemendikbud", total: 0, status: "failed", timestamp: "2025-04-07T16:20:00" },
+  { id: 4, keyword: "tanoto foundation scholarship", total: 1, status: "completed", timestamp: "2025-04-07T14:10:00" },
+];
 
 export default function ScholarshipsPage() {
+  const { token } = useAuth();
   const [keyword, setKeyword] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
@@ -45,6 +63,7 @@ export default function ScholarshipsPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify({ keyword }),
       });
@@ -68,25 +87,42 @@ export default function ScholarshipsPage() {
   // ── Action helpers ──
   const updateStatus = async (id: string, status: string, label: string) => {
     try {
-      await updateScholarshipStatus(id, status);
-      toast(`Scholarship ${label} successfully.`, "success");
-      
-      if (result) {
-        setResult((prev: any) => ({
-          ...prev,
-          items: prev.items.map((s: Scholarship) =>
-            s.id === id ? { ...s, status: status as Scholarship["status"] } : s
-          ),
-        }));
+      if (isStagingId(id)) {
+        if (status === "verified") {
+          await approveStagingEntry(id, undefined, token);
+        } else if (status === "suspicious" || status === "rejected") {
+          await rejectStagingEntry(id, undefined, token);
+        }
+        // Update local state to reflect status
+        if (result) {
+          setResult((prev: any) => ({
+            ...prev,
+            items: prev.items.map((s: Scholarship) =>
+              s.id === id ? { ...s, status: status as Scholarship["status"] } : s
+            ),
+          }));
+        }
+      } else {
+        await updateScholarshipStatus(id, status, token);
+        if (result) {
+          setResult((prev: any) => ({
+            ...prev,
+            items: prev.items.map((s: Scholarship) =>
+              s.id === id ? { ...s, status: status as Scholarship["status"] } : s
+            ),
+          }));
+        }
       }
+
+      toast(`Scholarship ${label} successfully.`, "success");
 
       if (modalScholarship?.id === id) {
         setModalScholarship((prev) =>
           prev ? { ...prev, status: status as Scholarship["status"] } : prev
         );
       }
-    } catch {
-      toast("Failed to update status.", "error");
+    } catch (err: any) {
+      toast(err.message || "Failed to update status.", "error");
     }
   };
 
@@ -102,19 +138,23 @@ export default function ScholarshipsPage() {
   const confirmDelete = async () => {
     if (!scholarshipToDelete) return;
     setIsDeleting(true);
-    
+
     try {
-      await deleteScholarship(scholarshipToDelete.id);
+      if (isStagingId(scholarshipToDelete.id)) {
+        await deleteStagingEntry(scholarshipToDelete.id, token);
+      } else {
+        await deleteScholarship(scholarshipToDelete.id, token);
+      }
       toast("Scholarship deleted successfully.", "success");
-      
+
       if (result) {
         setResult((prev: any) => ({
           ...prev,
           items: prev.items.filter((s: Scholarship) => s.id !== scholarshipToDelete.id),
         }));
       }
-    } catch {
-      toast("Failed to delete scholarship.", "error");
+    } catch (err: any) {
+      toast(err.message || "Failed to delete scholarship.", "error");
     } finally {
       setIsDeleting(false);
       setDeleteModalOpen(false);
@@ -125,22 +165,42 @@ export default function ScholarshipsPage() {
   const handleSave = async (id: string, updates: Partial<Scholarship>) => {
     setSavingModal(true);
     try {
-      const updated = await updateScholarship(id, updates);
-      setModalScholarship(updated);
-      toast("Scholarship updated successfully.", "success");
-      
-      if (result) {
-        setResult((prev: any) => ({
-          ...prev,
-          items: prev.items.map((s: Scholarship) =>
-            s.id === id ? { ...s, ...updates } : s
-          ),
-        }));
+      if (isStagingId(id)) {
+        // Map flat Scholarship fields to CrawlResultUpdate fields
+        const stagingUpdates: Record<string, any> = {};
+        if (updates.title !== undefined) stagingUpdates.title = updates.title;
+        if (updates.deadline !== undefined) stagingUpdates.deadline = updates.deadline;
+        if (updates.description !== undefined) stagingUpdates.description = updates.description;
+        if (updates.location !== undefined) stagingUpdates.location = updates.location;
+        if (updates.provider !== undefined) stagingUpdates.provider_name = updates.provider;
+        if (updates.amount !== undefined) stagingUpdates.amount = updates.amount;
+        if (updates.admin_notes !== undefined) stagingUpdates.admin_notes = updates.admin_notes;
+        await updateStagingEntry(id, stagingUpdates, token);
+        setModalScholarship((prev) => (prev ? { ...prev, ...updates } : prev));
+        if (result) {
+          setResult((prev: any) => ({
+            ...prev,
+            items: prev.items.map((s: Scholarship) =>
+              s.id === id ? { ...s, ...updates } : s
+            ),
+          }));
+        }
+      } else {
+        const updated = await updateScholarship(id, updates, token);
+        setModalScholarship(updated);
+        if (result) {
+          setResult((prev: any) => ({
+            ...prev,
+            items: prev.items.map((s: Scholarship) =>
+              s.id === id ? { ...s, ...updates } : s
+            ),
+          }));
+        }
       }
-
+      toast("Scholarship updated successfully.", "success");
       setIsModalOpen(false);
-    } catch {
-      toast("Failed to save changes.", "error");
+    } catch (err: any) {
+      toast(err.message || "Failed to save changes.", "error");
     } finally {
       setSavingModal(false);
     }
@@ -166,7 +226,7 @@ export default function ScholarshipsPage() {
 
   return (
     <div>
-      <AdminTopbar title="Scholarships" subtitle="Browse and manage all scholarship entries" />
+      <AdminTopbar title="Crawl Data / Search Scholarship" subtitle="Search and crawl scholarship data using AI" />
       <div className="p-6 mx-auto space-y-6">
         
         {/* Search & Crawl Component */}
@@ -270,6 +330,45 @@ export default function ScholarshipsPage() {
           )}
         </motion.div>
 
+          {/* Crawl History Section */}
+          <div className="mt-8">
+            <h2 className="text-lg font-bold text-foreground mb-4">Crawl History</h2>
+            <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-muted/50 text-muted-foreground uppercase text-xs">
+                  <tr>
+                    <th className="px-6 py-4 font-semibold">Keyword</th>
+                    <th className="px-6 py-4 font-semibold">Total Results</th>
+                    <th className="px-6 py-4 font-semibold">Status</th>
+                    <th className="px-6 py-4 font-semibold">Timestamp</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {MOCK_CRAWL_HISTORY.map((item) => (
+                    <tr key={item.id} className="hover:bg-muted/30 transition-colors">
+                      <td className="px-6 py-4 font-medium text-foreground">{item.keyword}</td>
+                      <td className="px-6 py-4">{item.total}</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                          item.status === 'completed' 
+                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' 
+                            : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                        }`}>
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-muted-foreground">
+                        {new Date(item.timestamp).toLocaleString("en-US", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
       </div>
 
       <DetailModal

@@ -2,6 +2,8 @@
 
 export type ScholarshipStatus = "unverified" | "pending" | "verified" | "suspicious";
 
+export type CrawlDataStatus = "valid" | "invalid" | "incomplete";
+
 export interface Scholarship {
   id: string;
   title: string;
@@ -13,7 +15,10 @@ export interface Scholarship {
   amount?: string;
   education_level?: string;
   location?: string;
-  status: ScholarshipStatus;
+  status: ScholarshipStatus | "approved" | "rejected";
+  data_status?: CrawlDataStatus;
+  eligible_universities?: string[];
+  is_university_specific?: boolean;
   trust_score: number;
   ai_summary?: string;
   admin_notes?: string;
@@ -30,12 +35,15 @@ export interface ScholarshipListResponse {
 }
 
 export interface AdminStats {
+  totalUsers: number;
+  activeUsers: number;
+  newUsers: number;
   total: number;
   verified: number;
-  pending: number;
-  suspicious: number;
   unverified: number;
-  avg_trust_score: number;
+  pending?: number;
+  suspicious?: number;
+  avg_trust_score?: number;
 }
 
 export interface ScholarshipUpdate {
@@ -48,6 +56,6 @@ export interface ScholarshipUpdate {
   amount?: string;
   education_level?: string;
   location?: string;
-  status?: ScholarshipStatus;
+  status?: ScholarshipStatus | "approved" | "rejected";
   admin_notes?: string;
 }

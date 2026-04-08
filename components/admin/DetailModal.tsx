@@ -153,14 +153,18 @@ export default function DetailModal({
                   <InfoCell
                     label="Source URL"
                     value={
-                      <a
-                        href={scholarship.source_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:text-primary/80 underline underline-offset-4 transition-colors truncate block font-bold"
-                      >
-                        {scholarship.source_url.replace(/^https?:\/\//, "").slice(0, 30)}…
-                      </a>
+                      scholarship.source_url ? (
+                        <a
+                          href={scholarship.source_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:text-primary/80 underline underline-offset-4 transition-colors truncate block font-bold"
+                        >
+                          {scholarship.source_url.replace(/^https?:\/\//, "").slice(0, 30)}…
+                        </a>
+                      ) : (
+                        "—"
+                      )
                     }
                   />
                 </div>

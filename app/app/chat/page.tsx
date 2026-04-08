@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Sparkles, Loader2 } from "lucide-react";
+import { ArrowLeft, Sparkles, Loader2, UserCircle, LogOut } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { ChatBubble } from "@/components/chat/ChatBubble";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { SuggestionChips } from "@/components/chat/SuggestionChips";
@@ -67,7 +69,8 @@ function persistMessages(messages: Message[]) {
 
 // ─── Page Component ───────────────────────────────────────────────────────────
 
-export default function ChatPage() {
+export function ChatPageContent() {
+  const { user, token, logout, isLoading } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -75,8 +78,19 @@ export default function ChatPage() {
   const [errorMsg, setErrorMsg] = useState<Message | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const sessionId = useRef("");
+  const router = useRouter();
 
-  // ─── Initialize: session + persisted messages ────────────────────────────
+  const searchParams = useSearchParams();
+  const processedRef = useRef(false);
+
+  // ─── Auth Protection Check ────────────────────────────────────────────────
+  useEffect(() => {
+    if (hydrated && !isLoading && !user) {
+      router.push("/login");
+    }
+  }, [hydrated, isLoading, user, router]);
+
+
 
   useEffect(() => {
     sessionId.current = getSessionId();
@@ -85,10 +99,20 @@ export default function ChatPage() {
       setMessages(saved);
     } else {
       // First visit → show initial greeting
-      setMessages([INITIAL_GREETING]);
+      const profileIncomplete = !user?.profile?.semester && !user?.profile?.university;
+      const greeting: Message = {
+        role: "assistant",
+        content: `Halo ${user?.name || ""}! Aku Somatch AI, asisten pribadimu untuk mencari beasiswa di Indonesia 🎓\n\n${
+          profileIncomplete 
+          ? "Sepertinya profilmu belum lengkap. Yuk, **[Lengkapi Profil di Sini](/app/profile)** agar aku bisa memberikan rekomendasi yang paling akurat!" 
+          : "Agar aku bisa memberikan rekomendasi yang paling akurat, silakan beritahu aku jika ada perubahan profilmu."
+        }\n\nApa yang bisa aku bantu hari ini?`,
+        mode: "general",
+      };
+      setMessages([greeting]);
     }
     setHydrated(true);
-  }, []);
+  }, [user]); // Add user to dependency to ensure profile check is accurate
 
   // ─── Persist messages on change ──────────────────────────────────────────
 
@@ -158,7 +182,10 @@ export default function ChatPage() {
       try {
         const res = await fetch(API_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
           body: JSON.stringify(payload),
           signal: controller.signal,
         });
@@ -208,6 +235,20 @@ export default function ChatPage() {
     [input, loading, messages]
   );
 
+  // Handle Query Param from Profile (Moved after sendMessage declaration)
+  useEffect(() => {
+    if (hydrated && !isLoading && user && !processedRef.current) {
+      const q = searchParams.get("q");
+      if (q) {
+        processedRef.current = true;
+        sendMessage(q);
+        // Clear param from URL without reloading
+        const newUrl = window.location.pathname;
+        window.history.replaceState({ path: newUrl }, "", newUrl);
+      }
+    }
+  }, [hydrated, isLoading, user, searchParams, sendMessage]);
+
   // ─── Suggestion Chip Handler ─────────────────────────────────────────────
 
   const handleSuggestion = useCallback(
@@ -221,7 +262,7 @@ export default function ChatPage() {
 
   if (!hydrated) {
     return (
-      <div className="flex items-center justify-center h-dvh bg-[oklch(0.09_0.025_260)]">
+      <div className="flex items-center justify-center h-dvh bg-white">
         <Loader2 className="w-6 h-6 text-[oklch(0.65_0.25_264)] animate-spin" />
       </div>
     );
@@ -237,48 +278,21 @@ export default function ChatPage() {
   // ─── Render ──────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col h-dvh bg-[oklch(0.09_0.025_260)] overflow-hidden">
-      {/* ── Header ────────────────────────────────────────────────────────── */}
-      <header className="relative flex-shrink-0 flex items-center gap-3 px-4 sm:px-6 h-16 border-b border-[oklch(0.2_0.05_260)] bg-[oklch(0.08_0.02_260/0.8)] backdrop-blur-xl z-10">
-        {/* Glow line */}
-        <div
-          className="absolute bottom-0 left-0 right-0 h-px"
-          style={{
-            background:
-              "linear-gradient(90deg, transparent, oklch(0.65 0.25 264 / 0.3), oklch(0.75 0.20 280 / 0.2), transparent)",
-          }}
-        />
-
-        <Link
-          href="/"
-          className="flex items-center justify-center w-9 h-9 rounded-xl text-[oklch(0.7_0.05_260)] hover:text-white hover:bg-[oklch(0.2_0.08_260/0.5)] transition-all duration-200"
-          aria-label="Kembali ke halaman utama"
-          id="back-button"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-
-        <div className="flex items-center gap-2.5 flex-1 min-w-0">
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg overflow-hidden">
-            <Image src="/favicon.png" alt="Somatch Logo" width={32} height={32} className="w-full h-full object-cover" />
-          </div>
-          <div className="min-w-0">
-            <h1 className="text-sm font-bold text-white leading-tight truncate font-[family-name:var(--font-heading)]">
-              Somatch AI
-            </h1>
-            <p className="text-[11px] text-[oklch(0.6_0.04_260)] leading-tight truncate">
-              Temukan beasiswa yang cocok untukmu
-            </p>
-          </div>
-        </div>
-      </header>
-
+    <div className="flex flex-col h-screen bg-white overflow-hidden">
       {/* ── Chat Area ─────────────────────────────────────────────────────── */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-4 scroll-smooth"
+        className="flex-1 overflow-y-auto px-4 sm:px-8 py-10 space-y-6 scroll-smooth"
         id="chat-area"
       >
+        {/* Page Header (inside chat) */}
+        <div className="mb-10 text-center flex flex-col items-center">
+          <div className="w-16 h-16 rounded-2xl bg-indigo-600/10 flex items-center justify-center border border-indigo-500/20 mb-4">
+             <Image src="/favicon.png" alt="Logo" width={40} height={40} />
+          </div>
+          <h1 className="text-2xl font-black text-slate-900 font-heading">AI Scholarship Assistant</h1>
+          <p className="text-slate-500 text-sm mt-1">Carikan beasiswa yang paling pas buat masa depanmu.</p>
+        </div>
         {/* Welcome + Suggestions (first visit only) */}
         <AnimatePresence>
           {showSuggestions && (
@@ -295,7 +309,7 @@ export default function ChatPage() {
                 <Image src="/favicon.png" alt="Somatch Logo" width={56} height={56} className="w-full h-full object-cover" />
               </div>
 
-              <p className="text-sm text-[oklch(0.55_0.04_260)] text-center max-w-xs leading-relaxed">
+              <p className="text-sm text-slate-600 text-center max-w-xs leading-relaxed">
                 Ceritakan profilmu — jenjang, minat, atau lokasi — dan aku
                 carikan beasiswa paling cocok untukmu.
               </p>
@@ -348,9 +362,9 @@ export default function ChatPage() {
               transition={{ duration: 0.2 }}
               className="flex items-center gap-2 px-1"
             >
-              <div className="flex items-center gap-2.5 px-4 py-3 rounded-2xl rounded-bl-md bg-[oklch(0.14_0.04_260)] border border-[oklch(0.22_0.05_260)]">
+              <div className="flex items-center gap-2.5 px-4 py-3 rounded-2xl rounded-bl-md bg-white border border-slate-200 shadow-sm">
                 <Loader2 className="w-4 h-4 text-[oklch(0.65_0.25_264)] animate-spin" />
-                <span className="text-sm text-[oklch(0.6_0.04_260)]">
+                <span className="text-sm text-slate-600">
                   Somatch sedang mengetik...
                 </span>
               </div>
@@ -360,7 +374,7 @@ export default function ChatPage() {
       </div>
 
       {/* ── Input Area ────────────────────────────────────────────────────── */}
-      <div className="flex-shrink-0 px-4 sm:px-6 pb-4 pt-2 bg-gradient-to-t from-[oklch(0.09_0.025_260)] via-[oklch(0.09_0.025_260)] to-transparent">
+      <div className="shrink-0 px-4 sm:px-6 pb-4 pt-2 bg-linear-to-t from-white via-white to-transparent relative z-10">
         <div className="max-w-3xl mx-auto">
           <ChatInput
             value={input}
@@ -368,12 +382,24 @@ export default function ChatPage() {
             onSend={() => sendMessage()}
             loading={loading}
           />
-          <p className="text-center text-[10px] text-[oklch(0.45_0.03_260)] mt-2">
+          <p className="text-center text-[10px] text-slate-500 mt-2">
             Somatch AI dapat membuat kesalahan. Verifikasi info beasiswa di
             sumber resmi.
           </p>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-dvh bg-white">
+        <Loader2 className="w-6 h-6 text-indigo-500 animate-spin" />
+      </div>
+    }>
+      <ChatPageContent />
+    </Suspense>
   );
 }

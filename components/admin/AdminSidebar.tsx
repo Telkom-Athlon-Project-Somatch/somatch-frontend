@@ -7,9 +7,9 @@ import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: "🏠", exact: true },
-  { href: "/admin/verification", label: "Verification Queue", icon: "✅", badge: "new" },
-  { href: "/admin/scholarships", label: "Scholarships", icon: "🎓" },
-  { href: "/admin/reports", label: "Reports", icon: "📊" },
+  { href: "/admin/crawl", label: "Crawl Data", icon: "🔍", badge: "new" },
+  { href: "/admin/verification", label: "Scholarship Management", icon: "✅" },
+  { href: "/admin/users", label: "User Management", icon: "👥" },
 ];
 
 export default function AdminSidebar() {

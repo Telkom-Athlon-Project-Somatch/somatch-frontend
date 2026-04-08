@@ -4,10 +4,12 @@ import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 import { ScholarshipStatus } from "@/types/scholarship";
 
+type ExtendedScholarshipStatus = ScholarshipStatus | "approved" | "rejected";
+
 // ─────────────────────────────────────────────
 // StatusBadge
 // ─────────────────────────────────────────────
-const STATUS_CONFIG: Record<ScholarshipStatus, { label: string; className: string }> = {
+const STATUS_CONFIG: Record<ExtendedScholarshipStatus, { label: string; className: string }> = {
   verified: {
     label: "Verified",
     className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
@@ -24,10 +26,18 @@ const STATUS_CONFIG: Record<ScholarshipStatus, { label: string; className: strin
     label: "Suspicious",
     className: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20",
   },
+  approved: {
+    label: "Approved",
+    className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
+  },
+  rejected: {
+    label: "Rejected",
+    className: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20",
+  },
 };
 
-export function StatusBadge({ status }: { status: ScholarshipStatus }) {
-  const config = STATUS_CONFIG[status];
+export function StatusBadge({ status }: { status: ExtendedScholarshipStatus }) {
+  const config = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
   return (
     <span
       className={cn(
@@ -146,7 +156,7 @@ export function Toast({ message, variant = "success", onClose }: ToastProps) {
 interface StatCardProps {
   label: string;
   value: number | string;
-  icon: string;
+  icon: React.ReactNode;
   color?: string;
   sublabel?: string;
 }

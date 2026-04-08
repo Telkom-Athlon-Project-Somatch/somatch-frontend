@@ -21,6 +21,7 @@ import {
   AdminStats,
 } from "@/types/scholarship";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 const STATUS_FILTERS = [
   { value: "all", label: "All", icon: "🗂️" },
@@ -39,6 +40,22 @@ const SORT_OPTIONS = [
 // ------------------------------------------------------------------
 // MOCK DATA — used when backend is unavailable
 // ------------------------------------------------------------------
+type ScholarshipLog = {
+  id: string;
+  action: "added" | "approved" | "rejected" | "pending" | "deleted" | "edited";
+  detail: string;
+  timestamp: string;
+};
+
+const MOCK_LOGS: ScholarshipLog[] = [
+  { id: "log-1", action: "added", detail: "AI added 12 scholarships (keyword: S1 luar negeri)", timestamp: "2025-04-08T10:30:00" },
+  { id: "log-2", action: "approved", detail: "Admin approved LPDP 2026", timestamp: "2025-04-08T09:15:00" },
+  { id: "log-3", action: "rejected", detail: "Admin rejected Scholarship XYZ (invalid data)", timestamp: "2025-04-08T08:45:00" },
+  { id: "log-4", action: "edited", detail: "Admin edited scholarship details", timestamp: "2025-04-07T16:20:00" },
+  { id: "log-5", action: "deleted", detail: "Admin deleted duplicate scholarship", timestamp: "2025-04-07T14:10:00" },
+  { id: "log-6", action: "pending", detail: "Admin marked Beasiswa Unggulan as pending", timestamp: "2025-04-07T11:05:00" },
+];
+
 const MOCK_SCHOLARSHIPS: Scholarship[] = [
   {
     id: "sch-001",
@@ -259,6 +276,7 @@ const MOCK_SCHOLARSHIPS: Scholarship[] = [
 ];
 
 export default function VerificationQueuePage() {
+  const { token } = useAuth();
   // ── State ──
   const [data, setData] = useState<ScholarshipListResponse | null>(null);
   const [stats, setStats] = useState<AdminStats | null>(null);
@@ -291,10 +309,9 @@ export default function VerificationQueuePage() {
         search: deferredSearch || undefined,
         status: statusFilter !== "all" ? statusFilter : undefined,
         sort_by: sortBy,
-        sort_order: sortOrder,
         page,
         page_size: 10,
-      });
+      }, token);
       setData(result);
       setUsesMock(false);
     } catch {
@@ -332,10 +349,13 @@ export default function VerificationQueuePage() {
   const loadStats = useCallback(async () => {
     setStatsLoading(true);
     try {
-      const s = await fetchStats();
+      const s = await fetchStats(token);
       setStats(s);
     } catch {
       setStats({
+        totalUsers: 1420,
+        activeUsers: 89,
+        newUsers: 124,
         total: MOCK_SCHOLARSHIPS.length,
         verified: MOCK_SCHOLARSHIPS.filter((s) => s.status === "verified").length,
         pending: MOCK_SCHOLARSHIPS.filter((s) => s.status === "pending").length,
@@ -356,7 +376,7 @@ export default function VerificationQueuePage() {
 
   useEffect(() => {
     loadStats();
-  }, [loadStats]);
+  }, [loadStats, token]);
 
   // Reset page on filter/search change
   useEffect(() => {
@@ -389,7 +409,7 @@ export default function VerificationQueuePage() {
       return;
     }
     try {
-      await updateScholarshipStatus(id, status);
+      await updateScholarshipStatus(id, status, token);
       toast(`Scholarship ${label} successfully.`, "success");
       loadData();
       loadStats();
@@ -432,7 +452,7 @@ export default function VerificationQueuePage() {
     }
     
     try {
-      await deleteScholarship(scholarshipToDelete.id);
+      await deleteScholarship(scholarshipToDelete.id, token);
       toast("Scholarship deleted successfully.", "success");
       loadData();
       loadStats();
@@ -467,7 +487,7 @@ export default function VerificationQueuePage() {
       return;
     }
     try {
-      const updated = await updateScholarship(id, updates);
+      const updated = await updateScholarship(id, updates, token);
       setModalScholarship(updated);
       toast("Scholarship updated successfully.", "success");
       loadData();
@@ -500,7 +520,7 @@ export default function VerificationQueuePage() {
       return;
     }
     try {
-      const result = await bulkUpdateStatus(ids, status);
+      const result = await bulkUpdateStatus(ids, status, token);
       toast(result.message, "success");
       setSelectedIds(new Set());
       loadData();
@@ -535,8 +555,8 @@ export default function VerificationQueuePage() {
   return (
     <div>
       <AdminTopbar
-        title="Verification Queue"
-        subtitle="Review and verify AI-crawled scholarship data"
+        title="Scholarship Management"
+        subtitle="Review, verify, and manage all scholarship data"
       />
 
       <div className="p-6 space-y-6">
@@ -747,6 +767,51 @@ export default function VerificationQueuePage() {
             </div>
           </div>
         )}
+
+        {/* --- Scholarship Activity Log --- */}
+        <div id="logs" className="pt-8 border-t border-border">
+          <h2 className="text-lg font-bold text-foreground mb-6 font-heading flex items-center gap-2">
+            <span className="text-primary">📋</span> Scholarship Activity Log
+          </h2>
+          <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+            <div className="max-h-[400px] overflow-y-auto">
+              <div className="p-6 space-y-6">
+                {MOCK_LOGS.map((log, index) => {
+                  const ICONS: Record<typeof log.action, string> = {
+                    added: "🤖",
+                    approved: "✅",
+                    rejected: "❌",
+                    pending: "⏳",
+                    deleted: "🗑️",
+                    edited: "✏️",
+                  };
+                  return (
+                    <div key={log.id} className="relative flex items-start gap-4">
+                      {/* Timeline line */}
+                      {index !== MOCK_LOGS.length - 1 && (
+                        <div className="absolute left-4 top-8 bottom-[-24px] w-px bg-border z-0" />
+                      )}
+                      
+                      {/* Activity Item */}
+                      <div className="relative z-10 w-8 h-8 rounded-full bg-muted border-2 border-card flex items-center justify-center shrink-0 shadow-sm text-sm">
+                        {ICONS[log.action]}
+                      </div>
+                      <div className="flex-1 pt-1">
+                        <p className="text-sm font-medium text-foreground">{log.detail}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {new Date(log.timestamp).toLocaleString("en-US", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Detail Modal */}

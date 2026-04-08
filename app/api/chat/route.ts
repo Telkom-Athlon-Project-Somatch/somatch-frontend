@@ -10,11 +10,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Backend URL not configured' }, { status: 500 });
     }
 
+    // Forward authorization from client
+    const authHeader = request.headers.get('authorization');
+
     const response = await fetch(backendUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'x-api-secret': apiSecret || '',
+        ...(authHeader ? { 'Authorization': authHeader } : {}),
       },
       body: JSON.stringify(body),
     });

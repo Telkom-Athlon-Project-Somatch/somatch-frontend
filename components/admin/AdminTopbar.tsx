@@ -22,7 +22,7 @@ export default function AdminTopbar({ title, subtitle }: AdminTopbarProps) {
 
   const handleLogout = () => {
     localStorage.removeItem("somatch_admin_auth");
-    router.push("/admin/login");
+    router.push("/");
   };
 
   return (
@@ -39,7 +39,7 @@ export default function AdminTopbar({ title, subtitle }: AdminTopbarProps) {
       <div className="flex items-center gap-3">
         {/* Notification Bell */}
         <div className="relative">
-          <button 
+          <button
             onClick={() => setShowNotifications(!showNotifications)}
             className="relative w-9 h-9 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
           >
@@ -52,8 +52,8 @@ export default function AdminTopbar({ title, subtitle }: AdminTopbarProps) {
           <AnimatePresence>
             {showNotifications && (
               <>
-                <div 
-                  className="fixed inset-0 z-40" 
+                <div
+                  className="fixed inset-0 z-40"
                   onClick={() => setShowNotifications(false)}
                 />
                 <motion.div
@@ -81,7 +81,7 @@ export default function AdminTopbar({ title, subtitle }: AdminTopbarProps) {
                     ))}
                   </div>
                   <div className="p-2 border-t border-border">
-                    <button 
+                    <button
                       onClick={() => {
                         setShowNotifications(false);
                         router.push("/admin/verification");

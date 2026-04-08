@@ -7,6 +7,7 @@ import { CheckCircle2, Sparkles, ArrowRight, Bot, User } from "lucide-react";
 import Image from "next/image";
 import { HeroChatDemo } from "./hero-chat-demo";
 import { motion } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 
 const heroFeatures = [
@@ -16,6 +17,8 @@ const heroFeatures = [
 ];
 
 export function HeroSection() {
+    const { user } = useAuth();
+    
     return (
         <section
             id="home"
@@ -40,11 +43,17 @@ export function HeroSection() {
                     </div>
 
                     <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-100 leading-[1.1]">
-                        Temukan <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 to-cyan-400">Beasiswa</span> yang Tepat untukmu dengan Bantuan <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 via-cyan-400 to-indigo-400">AI</span>
+                        {user ? (
+                            <>Selamat Datang Kembali, <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 to-cyan-400 truncate max-w-xs inline-block align-bottom">{user.email.split('@')[0]}</span></>
+                        ) : (
+                            <>Temukan <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 to-cyan-400">Beasiswa</span> yang Tepat untukmu dengan Bantuan <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 via-cyan-400 to-indigo-400">AI</span></>
+                        )}
                     </h1>
 
                     <p className="text-lg sm:text-xl text-slate-400 leading-relaxed max-w-xl">
-                        Sistem AI cerdas yang memahami profil akademikmu dan secara otomatis merekomendasikan peluang beasiswa yang paling relevan.
+                        {user 
+                            ? "Senang melihat Anda kembali. Lanjutkan pencarian beasiswa impian Anda dengan asisten AI kami yang sudah mengenali profil Anda."
+                            : "Sistem AI cerdas yang memahami profil akademikmu dan secara otomatis merekomendasikan peluang beasiswa yang paling relevan."}
                     </p>
 
                     {/* Feature bullets */}

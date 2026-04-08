@@ -84,12 +84,12 @@ export function ChatBubble({ role, content, mode }: ChatBubbleProps) {
           className={`relative px-4 py-3 text-sm leading-relaxed break-words markdown-content ${
             isUser
               ? "bg-gradient-to-br from-[oklch(0.55_0.25_264)] to-[oklch(0.45_0.25_280)] text-white rounded-2xl rounded-br-md shadow-[0_2px_16px_oklch(0.55_0.25_264/0.25)]"
-              : `bg-[oklch(0.14_0.04_260)] text-[oklch(0.9_0.02_260)] rounded-2xl rounded-bl-md shadow-[0_2px_12px_oklch(0_0_0/0.2)] ${
+              : `bg-slate-50 text-slate-800 rounded-2xl rounded-bl-md shadow-sm ${
                   mode === "recommendation"
-                    ? "border border-[oklch(0.5_0.18_140/0.35)]"
+                    ? "border border-indigo-200"
                     : mode === "profile_request"
-                    ? "border border-[oklch(0.5_0.12_60/0.35)]"
-                    : "border border-[oklch(0.22_0.05_260)]"
+                    ? "border border-amber-200"
+                    : "border border-slate-200"
                 }`
           }`}
         >
@@ -100,7 +100,7 @@ export function ChatBubble({ role, content, mode }: ChatBubbleProps) {
               ul: ({ node, ...props }) => <ul {...props} className="list-disc ml-4 mb-2" />,
               ol: ({ node, ...props }) => <ol {...props} className="list-decimal ml-4 mb-2" />,
               li: ({ node, ...props }) => <li {...props} className="mb-0.5" />,
-              strong: ({ node, ...props }) => <strong {...props} className="font-bold text-white" />,
+              strong: ({ node, ...props }) => <strong {...props} className="font-bold text-inherit" />,
             }}
           >
             {content}

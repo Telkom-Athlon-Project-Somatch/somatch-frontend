@@ -35,9 +35,9 @@ export function SuggestionChips({ onSelect }: SuggestionChipsProps) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onSelect(s.text)}
-            className="group flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium text-[oklch(0.8_0.08_264)] bg-[oklch(0.16_0.05_260)] border border-[oklch(0.25_0.08_264/0.4)] hover:bg-[oklch(0.2_0.08_264/0.5)] hover:border-[oklch(0.45_0.2_264/0.5)] hover:text-white transition-all duration-200 shadow-sm hover:shadow-[0_0_16px_oklch(0.55_0.25_264/0.15)]"
+            className="group flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 hover:border-indigo-300 hover:text-slate-900 transition-all duration-200 shadow-sm hover:shadow-md"
           >
-            <Icon className="w-4 h-4 text-[oklch(0.6_0.2_264)] group-hover:text-[oklch(0.65_0.25_264)] transition-colors duration-200" />
+            <Icon className="w-4 h-4 text-indigo-500 group-hover:text-indigo-600 transition-colors duration-200" />
             {s.text}
           </motion.button>
         );

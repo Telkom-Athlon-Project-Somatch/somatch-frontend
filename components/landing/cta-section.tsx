@@ -6,7 +6,11 @@ import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
+import { useAuth } from "@/context/AuthContext";
+
 export function CtaSection() {
+    const { user } = useAuth();
+
     return (
         <section className="py-32 relative overflow-hidden">
             {/* Ambient Background Glow */}
@@ -21,24 +25,30 @@ export function CtaSection() {
                     className="flex flex-col items-center text-center gap-6"
                 >
                     <p className="text-sm font-semibold text-indigo-400 uppercase tracking-widest">
-                        Mulai Sekarang
+                        {user ? "Akses Sekarang" : "Mulai Sekarang — Gratis"}
                     </p>
                     <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-white max-w-2xl leading-tight">
-                        Siap Menemukan Beasiswa yang Cocok untukmu?
+                        {user 
+                            ? "Siap Menemukan Beasiswa yang Cocok untukmu?" 
+                            : "Dapatkan Rekomendasi Beasiswa dalam Hitungan Detik"}
                     </h2>
                     <p className="text-slate-300/80 text-lg max-w-xl leading-relaxed font-light mt-2">
-                        Mulai percakapan dengan AI dan temukan rekomendasi beasiswa yang
-                        relevan dengan profilmu dalam hitungan menit.
+                        {user 
+                            ? "Lanjutkan percakapan dengan AI dan temukan beasiswa yang paling relevan dengan profil akademikmu."
+                            : "Buat akun sekarang dan mulai gunakan asisten AI kami untuk mencocokkan profilmu dengan ribuan peluang beasiswa."}
                     </p>
                     <Link
-                        href="/chat"
+                        href={user ? "/chat" : "/register"}
                         className={cn(
                             buttonVariants({ size: "lg" }),
-                            "bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white mt-4 gap-2 border-0 shadow-lg shadow-indigo-500/25 transition-all duration-300 hover:shadow-indigo-500/40 hover:-translate-y-0.5 rounded-full px-8"
+                            "group relative overflow-hidden bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white mt-4 gap-2 border-0 shadow-lg shadow-indigo-500/25 transition-all duration-300 hover:shadow-indigo-500/40 hover:-translate-y-0.5 rounded-full px-10 h-14"
                         )}
                     >
-                        Mulai Chat dengan AI
-                        <ArrowRight className="h-5 w-5 ml-1" />
+                        <span className="relative z-10 flex items-center gap-2 text-base font-semibold">
+                            {user ? "Mulai Chat dengan AI" : "Daftar & Cari Beasiswa"}
+                            <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                        </span>
+                        <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </Link>
                 </motion.div>
             </div>
